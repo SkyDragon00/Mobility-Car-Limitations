@@ -41,10 +41,17 @@
                     <p class="text-sm text-orange-600 mt-1">Enter your plate in the format: ABC-1234</p>
                 </div>
                 
-                <div class="mb-6">
-                    <label for="date" class="block text-orange-700 font-medium mb-2">Select Date</label>
-                    <input type="date" id="date" 
-                           class="w-full p-3 border-2 border-orange-300 rounded-lg focus:border-orange-500 focus:outline-none">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="date" class="block text-orange-700 font-medium mb-2">Select Date</label>
+                        <input type="date" id="date" 
+                               class="w-full p-3 border-2 border-orange-300 rounded-lg focus:border-orange-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label for="time" class="block text-orange-700 font-medium mb-2">Select Time</label>
+                        <input type="time" id="time" 
+                               class="w-full p-3 border-2 border-orange-300 rounded-lg focus:border-orange-500 focus:outline-none">
+                    </div>
                 </div>
                 
                 <button id="checkBtn" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 pulse">
@@ -76,15 +83,16 @@
             checkBtn.addEventListener('click', function() {
                 const plate = document.getElementById('plate').value.trim().toUpperCase();
                 const dateInput = document.getElementById('date').value;
+                const timeInput = document.getElementById('time').value;
                 
-                if (!plate || !dateInput) {
-                    showResult('Please enter both license plate and date');
+                if (!plate || !dateInput || !timeInput) {
+                    showResult('Please enter license plate, date, and time.');
                     return;
                 }
 
                 // Make AJAX request to Django backend
-                fetch(`/restrictions/check_restrictions/?plate=${plate}&date=${dateInput}`)
-                    .then(response => response.json())
+                fetch(`/restrictions/check_restrictions/?plate=${plate}&date=${dateInput}&time=${timeInput}`)
+                    .then(response => response.json()) // Parse the response as JSON
                     .then(data => {
                         if (data.error) {
                             showResult(data.error);
