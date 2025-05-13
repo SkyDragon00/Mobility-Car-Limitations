@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Circulation Restriction Checker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-orange-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-3xl">
+        <!-- Header -->
+        <header class="bg-orange-600 text-white rounded-xl p-6 mb-8 glow">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold">Vehicle Circulation Restriction Checker</h1>
+                    <p class="mt-2">Check if your vehicle can circulate today</p>
+                </div>
+                <div class="bg-white text-orange-600 p-3 rounded-full">
+                    <i class="fas fa-car text-3xl"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main>
+            <!-- Input Section -->
+            <section class="bg-white rounded-xl shadow-lg p-6 mb-8 slide-in">
+                <h2 class="text-2xl font-semibold text-orange-800 mb-4">Enter Your Vehicle Details</h2>
+                
+                <div class="mb-4">
+                    <label for="plate" class="block text-orange-700 font-medium mb-2">License Plate Number</label>
+                    <div class="relative">
+                        <input type="text" id="plate" placeholder="PBX-1234" 
+                               class="w-full p-3 border-2 border-orange-300 rounded-lg focus:border-orange-500 focus:outline-none"
+                               maxlength="8">
+                        <div class="absolute right-3 top-3 text-orange-500">
+                            <i class="fas fa-car"></i>
+                        </div>
+                    </div>
+                    <p class="text-sm text-orange-600 mt-1">Enter your plate in the format: ABC-1234</p>
+                </div>
+                
+                <div class="mb-6">
+                    <label for="date" class="block text-orange-700 font-medium mb-2">Select Date</label>
+                    <input type="date" id="date" 
+                           class="w-full p-3 border-2 border-orange-300 rounded-lg focus:border-orange-500 focus:outline-none">
+                </div>
+                
+                <button id="checkBtn" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 pulse">
+                    Check Restrictions <i class="fas fa-search ml-2"></i>
+                </button>
+            </section>
+            
+            <!-- Result Section -->
+            <section id="resultSection" class="hidden bg-white rounded-xl shadow-lg p-6 mb-8 slide-in">
+                <h2 class="text-2xl font-semibold text-orange-800 mb-4">Restriction Status</h2>
+                <div id="resultContent" class="text-center p-6 rounded-lg">
+                    <!-- Result will be displayed here -->
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="mt-12 text-center text-orange-800">
+            <p>© 2023 Ministry of Transportation. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkBtn = document.getElementById('checkBtn');
+            const resultSection = document.getElementById('resultSection');
+            const resultContent = document.getElementById('resultContent');
+            
+            checkBtn.addEventListener('click', function() {
+                const plate = document.getElementById('plate').value.trim().toUpperCase();
+                const dateInput = document.getElementById('date').value;
+                
+                if (!plate || !dateInput) {
+                    showResult('Please enter both license plate and date');
+                    return;
+                }
+
+                // Make AJAX request to Django backend
+                fetch(`/restrictions/check_restrictions/?plate=${plate}&date=${dateInput}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            showResult(data.error);
+                        } else {
+                            showResult(`
+                                <div class="bg-${data.can_circulate ? 'green' : 'red'}-100 text-${data.can_circulate ? 'green' : 'red'}-800 p-6 rounded-lg">
+                                    <i class="fas fa-${data.can_circulate ? 'check' : 'times'}-circle text-5xl mb-4 text-${data.can_circulate ? 'green' : 'red'}-600"></i>
+                                    <h3 class="text-xl font-bold mb-2">${data.message}</h3>
+                                    <p class="mb-2">License Plate: <span class="font-bold">${data.plate}</span></p>
+                                    <p class="mb-2">Date: <span class="font-bold">${data.date}</span></p>
+                                </div>
+                            `);
+                        }
+                    })
+                    .catch(error => showResult('There was an error, please try again later.'));
+            });
+
+            function showResult(content) {
+                resultContent.innerHTML = content;
+                resultSection.classList.remove('hidden');
+                resultSection.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            const today = new Date();
+            document.getElementById('date').valueAsDate = today;
+        });
+    </script>
+</body>
+</html>
