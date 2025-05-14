@@ -28,44 +28,99 @@
             <section class="bg-white rounded-xl shadow-lg p-6 mb-8 slide-in">
                 <h2 class="text-2xl font-semibold text-orange-800 mb-4">Enter Your Vehicle Details</h2>
                 
-                <div class="mb-4">
-                    <label for="plate" class="block text-orange-700 font-medium mb-2">License Plate Number</label>
-                    <div class="relative">
-                        <input type="text" id="plate" placeholder="PBX-1234" 
-                               class="w-full p-3 border-2 border-orange-300 rounded-lg focus:border-orange-500 focus:outline-none"
-                               maxlength="8">
-                        <div class="absolute right-3 top-3 text-orange-500">
-                            <i class="fas fa-car"></i>
+                <form method="post"action="{% url 'home' %}">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label for="plate" class="block text-orange-700 font-medium mb-2">License Plate Number</label>
+                        <div class="relative">
+                            <input type="text" id="plate" placeholder="PBX-1234" name="plate" required
+                                   class="w-full p-3 border-2 border-orange-300 rounded-lg focus:border-orange-500 focus:outline-none"
+                                   maxlength="8">
+                            <div class="absolute right-3 top-3 text-orange-500">
+                                <i class="fas fa-car"></i>
+                            </div>
+                        </div>
+                        <p class="text-sm text-orange-600 mt-1">Enter your plate in the format: ABC-1234</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label for="date" class="block text-orange-700 font-medium mb-2">Select Date</label>
+                            <input type="date" id="date" name="date" required
+                                   class="w-full p-3 border-2 border-orange-300 rounded-lg focus:border-orange-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label for="time" class="block text-orange-700 font-medium mb-2">Select Time</label>
+                            <input type="time" id="time" name="time" required
+                                   class="w-full p-3 border-2 border-orange-300 rounded-lg focus:border-orange-500 focus:outline-none">
                         </div>
                     </div>
-                    <p class="text-sm text-orange-600 mt-1">Enter your plate in the format: ABC-1234</p>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <div>
-                        <label for="date" class="block text-orange-700 font-medium mb-2">Select Date</label>
-                        <input type="date" id="date" 
-                               class="w-full p-3 border-2 border-orange-300 rounded-lg focus:border-orange-500 focus:outline-none">
-                    </div>
-                    <div>
-                        <label for="time" class="block text-orange-700 font-medium mb-2">Select Time</label>
-                        <input type="time" id="time" 
-                               class="w-full p-3 border-2 border-orange-300 rounded-lg focus:border-orange-500 focus:outline-none">
-                    </div>
-                </div>
-                
-                <button id="checkBtn" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 pulse">
-                    Check Restrictions <i class="fas fa-search ml-2"></i>
-                </button>
+                    
+                    <button class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 pulse" type="submit">
+                        Check Restrictions <i class="fas fa-search ml-2"></i>
+                    </button>
+                </form>
             </section>
             
             <!-- Result Section -->
-            <section id="resultSection" class="hidden bg-white rounded-xl shadow-lg p-6 mb-8 slide-in">
+            {% if error %}
+                <section id="errorSection" class="bg-red-100 text-red-800 p-6 rounded-lg mb-8 slide-in">
+                    <h2 class="text-2xl font-semibold mb-4">Error</h2>
+                    <p class="mb-2">An error occurred while processing your request.</p>
+                    <p class="mb-2">Error Message: <span class="font-bold">{{ error }}</span></p>
+                </section>
+            {% endif %}
+            {% if result %}
+            <section id="resultSection" class="bg-white rounded-xl shadow-lg p-6 mb-8 slide-in">
                 <h2 class="text-2xl font-semibold text-orange-800 mb-4">Restriction Status</h2>
                 <div id="resultContent" class="text-center p-6 rounded-lg">
-                    <!-- Result will be displayed here -->
+                    {% if result.can_circulate %}
+                        <div class="bg-green-100 text-green-800 p-6 rounded-lg">
+                            <i class="fas fa-check-circle text-5xl mb-4 text-green-600"></i>
+                            <h3 class="text-xl font-bold mb-2">You can circulate!</h3>
+                            <p class="mb-2">License Plate: <span class="font-bold">{{ result.plate }}</span></p>
+                            <p class="mb-2">Date
+                                {% if result.date %}
+                                    : <span class="font-bold">{{ result.date }}</span>
+                                {% else %}
+                                    : <span class="font-bold">Today</span>
+                                {% endif %}
+                            </p>
+                            <p class="mb-2">Time
+                                {% if result.time %}
+                                    : <span class="font-bold">{{ result.time }}</span>
+                                {% else %}
+                                    : <span class="font-bold">Now</span>
+                                {% endif %}
+                            </p>
+                            <p class="mb-2">Restriction: <span class="font-bold">{{ result.restriction }}</span></p>
+                            <p class="mb-2">Message: <span class="font-bold">{{ result.message }}</span></p>
+                        </div>
+                    {% else %}
+                        <div class="bg-red-100 text-red-800 p-6 rounded-lg">
+                            <i class="fas fa-times-circle text-5xl mb-4 text-red-600"></i>
+                            <h3 class="text-xl font-bold mb-2">You cannot circulate!</h3>
+                            <p class="mb-2">License Plate: <span class="font-bold">{{ result.plate }}</span></p>
+                            <p class="mb-2">Date
+                                {% if result.date %}
+                                    : <span class="font-bold">{{ result.date }}</span>
+                                {% else %}
+                                    : <span class="font-bold">Today</span>
+                                {% endif %}
+                            </p>
+                            <p class="mb-2">Time
+                                {% if result.time %}
+                                    : <span class="font-bold">{{ result.time }}</span>
+                                {% else %}
+                                    : <span class="font-bold">Now</span>
+                                {% endif %}
+                            </p>
+                            <p class="mb-2">Restriction: <span class="font-bold">{{ result.restriction }}</span></p>
+                            <p class="mb-2">Message: <span class="font-bold">{{ result.message }}</span></p>
+                        </div>
+                    {% endif %}
                 </div>
-            </section>
+            {%endif%}
         </main>
 
         <!-- Footer -->
@@ -73,52 +128,5 @@
             <p>© 2023 Ministry of Transportation. All rights reserved.</p>
         </footer>
     </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const checkBtn = document.getElementById('checkBtn');
-            const resultSection = document.getElementById('resultSection');
-            const resultContent = document.getElementById('resultContent');
-            
-            checkBtn.addEventListener('click', function() {
-                const plate = document.getElementById('plate').value.trim().toUpperCase();
-                const dateInput = document.getElementById('date').value;
-                const timeInput = document.getElementById('time').value;
-                
-                if (!plate || !dateInput || !timeInput) {
-                    showResult('Please enter license plate, date, and time.');
-                    return;
-                }
-
-                // Make AJAX request to Django backend
-                fetch(`/restrictions/check_restrictions/?plate=${plate}&date=${dateInput}&time=${timeInput}`)
-                    .then(response => response.json()) // Parse the response as JSON
-                    .then(data => {
-                        if (data.error) {
-                            showResult(data.error);
-                        } else {
-                            showResult(`
-                                <div class="bg-${data.can_circulate ? 'green' : 'red'}-100 text-${data.can_circulate ? 'green' : 'red'}-800 p-6 rounded-lg">
-                                    <i class="fas fa-${data.can_circulate ? 'check' : 'times'}-circle text-5xl mb-4 text-${data.can_circulate ? 'green' : 'red'}-600"></i>
-                                    <h3 class="text-xl font-bold mb-2">${data.message}</h3>
-                                    <p class="mb-2">License Plate: <span class="font-bold">${data.plate}</span></p>
-                                    <p class="mb-2">Date: <span class="font-bold">${data.date}</span></p>
-                                </div>
-                            `);
-                        }
-                    })
-                    .catch(error => showResult('There was an error, please try again later.'));
-            });
-
-            function showResult(content) {
-                resultContent.innerHTML = content;
-                resultSection.classList.remove('hidden');
-                resultSection.scrollIntoView({ behavior: 'smooth' });
-            }
-
-            const today = new Date();
-            document.getElementById('date').valueAsDate = today;
-        });
-    </script>
 </body>
 </html>
