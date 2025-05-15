@@ -115,6 +115,9 @@
                                     : <span class="font-bold">Now</span>
                                 {% endif %}
                             </p>
+                            {% if result.restriction_period %}
+                            <p class="mb-2">Restriction period: <span class="font-bold">{{ result.restriction_period }}</span></p>
+                            {% endif %}
                             <p class="mb-2">Restriction: <span class="font-bold">{{ result.restriction }}</span></p>
                             <p class="mb-2">Message: <span class="font-bold">{{ result.message }}</span></p>
                         </div>
@@ -125,7 +128,7 @@
 
         <!-- Footer -->
         <footer class="mt-12 text-center text-orange-800">
-            <p>© 2023 Ministry of Transportation. All rights reserved.</p>
+            <p>Copyright © 2022. Municipio de Quito. Todos los derechos reservados.</p>
         </footer>
     </div>
 </body>
